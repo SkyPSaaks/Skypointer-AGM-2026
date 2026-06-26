@@ -708,15 +708,17 @@
   </div>
 
   <script>
-    // ─────────────────────────────────────────────
+    // ───────────────────────────────────────────────────
     // CONFIGURATION — fill in after Power Automate setup
-    // ─────────────────────────────────────────────
+    // ───────────────────────────────────────────────────
     const POWER_AUTOMATE_URL = 'https://default0b62858165394659b4b62578bcf549.fa.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a7e81b8da9f644bebb435c74555392a6/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=3R8htIkac54DQZMbembpOzvvwjirmNZqYBdWz6fC_ck';
     const SUBMISSION_SECRET  = 'skypointer-agm-k7x2026';
     // ─────────────────────────────────────────────
 
     function openModal()  { document.getElementById('overlay').classList.add('open'); }
+    window.addEventListener('load', function() {
     if (window.location.hash === '#register') { openModal(); }
+   });
     function closeModal() { document.getElementById('overlay').classList.remove('open'); }
     function handleOverlayClick(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
