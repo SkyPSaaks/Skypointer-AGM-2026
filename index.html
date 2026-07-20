@@ -390,7 +390,7 @@
     // Google Calendar — pass Madrid timezone explicitly so it shows correctly for everyone
     function makeGoogleURL(key) {
       const ev = EVENTS[key];
-      const fmt = s => s.replace(/[-:T]/g, '').slice(0, 15); // YYYYMMDDTHHmmss
+      const fmt = s => s.replace(/-/g, '').replace(/:/g, ''); // keep T, strip - and :
       return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
         + '&text=' + encodeURIComponent(ev.label)
         + '&dates=' + fmt(ev.start) + '/' + fmt(ev.end)
