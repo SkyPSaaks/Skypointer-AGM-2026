@@ -86,7 +86,7 @@
       font-size: 110px;
       font-weight: 400;
       line-height: 1;
-      color: var(--gray-08);
+      color: var(--gray-15);
       letter-spacing: -0.02em;
       pointer-events: none;
       user-select: none;
@@ -226,7 +226,7 @@
         <div class="schedule-day">Fri 23</div>
         <div class="schedule-content">
           <div class="schedule-title">AGM &amp; Investor Day</div>
-          <div class="schedule-detail">8:30 am – 1:00 pm · Venue TBC</div>
+          <div class="schedule-detail">8:30 am – 1:00 pm · Club Financiero Génova</div>
         </div>
       </div>
     </div>
@@ -260,7 +260,7 @@
             <input type="checkbox" id="chk-agm" onchange="toggleOption('opt-agm', this)" />
             <div class="event-info">
               <div class="event-name">AGM &amp; Investor Day</div>
-              <div class="event-meta">Friday 23 October · 8:30 am – 1:00 pm<br>Breakfast will be served</div>
+              <div class="event-meta">Friday 23 October · 8:30 am – 1:00 pm<br>Club Financiero Génova · Breakfast will be served</div>
             </div>
             <div class="event-badge">Fri 23</div>
           </label>
@@ -268,7 +268,7 @@
             <input type="checkbox" id="chk-lunch" onchange="toggleOption('opt-lunch', this)" />
             <div class="event-info">
               <div class="event-name">Post-AGM Lunch</div>
-              <div class="event-meta">Friday 23 October · From 1:00 pm · Venue TBC</div>
+              <div class="event-meta">Friday 23 October · From 1:00 pm<br>Club Financiero Génova</div>
             </div>
             <div class="event-badge">Fri 23</div>
           </label>
@@ -341,19 +341,25 @@
         label: 'Skypointer Community Dinner',
         start: '2026-10-22T20:30:00',
         end:   '2026-10-22T23:00:00',
-        desc:  'Skypointer Venture Partners Community Dinner — AGM 2026, Madrid'
+        location: 'Madrid, Spain (Venue TBC)',
+        mapsUrl: null,
+        desc:  'Skypointer Venture Partners Community Dinner — AGM 2026, Madrid\nVenue to be confirmed.'
       },
       agm: {
         label: 'Skypointer AGM & Investor Day',
         start: '2026-10-23T08:30:00',
         end:   '2026-10-23T13:00:00',
-        desc:  'Skypointer Venture Partners AGM & Investor Day 2026, Madrid. Breakfast will be served.'
+        location: 'Club Financiero Génova, Madrid, Spain',
+        mapsUrl: 'https://maps.app.goo.gl/PscrrneQ4S5uUe5P7',
+        desc:  'Skypointer Venture Partners AGM & Investor Day 2026\nVenue: Club Financiero Génova, Madrid\nMap: https://maps.app.goo.gl/PscrrneQ4S5uUe5P7\n\nBreakfast will be served.'
       },
       lunch: {
         label: 'Skypointer Post-AGM Lunch',
         start: '2026-10-23T13:00:00',
         end:   '2026-10-23T15:00:00',
-        desc:  'Skypointer Venture Partners Post-AGM Lunch 2026, Madrid'
+        location: 'Club Financiero Génova, Madrid, Spain',
+        mapsUrl: 'https://maps.app.goo.gl/PscrrneQ4S5uUe5P7',
+        desc:  'Skypointer Venture Partners Post-AGM Lunch 2026\nVenue: Club Financiero Génova, Madrid\nMap: https://maps.app.goo.gl/PscrrneQ4S5uUe5P7'
       }
     };
 
@@ -361,7 +367,7 @@
     function makeMultiICS(keys) {
       const fmtLocal = s => s.replace(/[-:]/g, '');
       const stamp = new Date().toISOString().replace(/[-:]/g,'').replace('.000Z','Z');
-      let veventBlocks = keys.map((key, i) => {
+      const veventBlocks = keys.map((key, i) => {
         const ev = EVENTS[key];
         return [
           'BEGIN:VEVENT',
@@ -370,8 +376,8 @@
           'DTSTART;TZID=Europe/Madrid:' + fmtLocal(ev.start),
           'DTEND;TZID=Europe/Madrid:' + fmtLocal(ev.end),
           'SUMMARY:' + ev.label,
-          'DESCRIPTION:' + ev.desc,
-          'LOCATION:Madrid, Spain (Venue TBC)',
+          'DESCRIPTION:' + ev.desc.replace(/\n/g, '\\n'),
+          'LOCATION:' + ev.location,
           'END:VEVENT'
         ].join('\r\n');
       });
@@ -396,7 +402,7 @@
         + '&dates=' + fmt(ev.start) + '/' + fmt(ev.end)
         + '&ctz=Europe%2FMadrid'
         + '&details=' + encodeURIComponent(ev.desc)
-        + '&location=' + encodeURIComponent('Madrid, Spain (Venue TBC)');
+        + '&location=' + encodeURIComponent(ev.location);
     }
 
     async function submitForm() {
