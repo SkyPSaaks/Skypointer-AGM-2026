@@ -336,38 +336,6 @@
       document.getElementById(optId).classList.toggle('selected', checkbox.checked);
     }
 
-    // ICS generator — creates a downloadable calendar file
-    function makeICS(title, startISO, endISO, description) {
-      const fmt = s => s.replace(/[-:]/g,'').replace('.000','');
-      const uid = Date.now() + '@skypointer.com';
-      const ics = [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//Skypointer VP//AGM 2026//EN',
-        'BEGIN:VEVENT',
-        'UID:' + uid,
-        'DTSTAMP:' + fmt(new Date().toISOString()),
-        'DTSTART:' + fmt(startISO),
-        'DTEND:' + fmt(endISO),
-        'SUMMARY:' + title,
-        'DESCRIPTION:' + description,
-        'LOCATION:Madrid (Venue TBC)',
-        'END:VEVENT',
-        'END:VCALENDAR'
-      ].join('\r\n');
-      return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
-    }
-
-    // Google Calendar URL generator
-    function makeGoogleURL(title, startISO, endISO, description) {
-      const fmt = s => s.replace(/[-:T]/g,'').replace('.000Z','Z');
-      return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
-        + '&text=' + encodeURIComponent(title)
-        + '&dates=' + fmt(startISO) + '/' + fmt(endISO)
-        + '&details=' + encodeURIComponent(description)
-        + '&location=' + encodeURIComponent('Madrid, Spain (Venue TBC)');
-    }
-
     const EVENTS = {
       dinner: {
         label: 'Skypointer Community Dinner',
@@ -376,18 +344,60 @@
         desc:  'Skypointer Venture Partners Community Dinner — AGM 2026, Madrid'
       },
       agm: {
-        label: 'AGM & Investor Day',
+        label: 'Skypointer AGM & Investor Day',
         start: '2026-10-23T08:30:00',
         end:   '2026-10-23T13:00:00',
-        desc:  'Skypointer Venture Partners AGM & Investor Day 2026, Madrid'
+        desc:  'Skypointer Venture Partners AGM & Investor Day 2026, Madrid. Breakfast will be served.'
       },
       lunch: {
-        label: 'Post-AGM Lunch',
+        label: 'Skypointer Post-AGM Lunch',
         start: '2026-10-23T13:00:00',
         end:   '2026-10-23T15:00:00',
         desc:  'Skypointer Venture Partners Post-AGM Lunch 2026, Madrid'
       }
     };
+
+    // Build a single .ics file containing all registered events
+    function makeMultiICS(keys) {
+      const fmtLocal = s => s.replace(/[-:]/g, '');
+      const stamp = new Date().toISOString().replace(/[-:]/g,'').replace('.000Z','Z');
+      let veventBlocks = keys.map((key, i) => {
+        const ev = EVENTS[key];
+        return [
+          'BEGIN:VEVENT',
+          'UID:' + (Date.now() + i) + '@skypointer.com',
+          'DTSTAMP:' + stamp,
+          'DTSTART;TZID=Europe/Madrid:' + fmtLocal(ev.start),
+          'DTEND;TZID=Europe/Madrid:' + fmtLocal(ev.end),
+          'SUMMARY:' + ev.label,
+          'DESCRIPTION:' + ev.desc,
+          'LOCATION:Madrid, Spain (Venue TBC)',
+          'END:VEVENT'
+        ].join('\r\n');
+      });
+      const ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Skypointer VP//AGM 2026//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        ...veventBlocks,
+        'END:VCALENDAR'
+      ].join('\r\n');
+      return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+    }
+
+    // Google Calendar only supports one event per URL, so link to the first registered event
+    // and note others are in the .ics file
+    function makeGoogleURL(key) {
+      const ev = EVENTS[key];
+      const fmt = s => s.replace(/[-:T]/g,'') + '00';
+      return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+        + '&text=' + encodeURIComponent(ev.label)
+        + '&dates=' + fmt(ev.start) + '/' + fmt(ev.end)
+        + '&details=' + encodeURIComponent(ev.desc)
+        + '&location=' + encodeURIComponent('Madrid, Spain (Venue TBC)');
+    }
 
     async function submitForm() {
       const dinner = document.getElementById('chk-dinner').checked;
@@ -433,7 +443,7 @@
         if (agm)    { addSuccessItem(eventsEl, 'AGM & Investor Day — Fri 23 Oct, 8:30 am'); registered.push('agm'); }
         if (lunch)  { addSuccessItem(eventsEl, 'Post-AGM Lunch — Fri 23 Oct, from 1:00 pm'); registered.push('lunch'); }
 
-        // Build calendar buttons
+        // Build calendar buttons — single file with all events
         const calSection = document.getElementById('calSection');
         calSection.innerHTML = '';
         if (registered.length > 0) {
@@ -442,39 +452,36 @@
           label.textContent = 'Add to your calendar';
           calSection.appendChild(label);
 
-          registered.forEach(key => {
-            const ev = EVENTS[key];
-            const group = document.createElement('div');
-            group.className = 'cal-event-group';
+          const row = document.createElement('div');
+          row.className = 'cal-btn-row';
+          row.style.justifyContent = 'center';
+          row.style.marginTop = '6px';
 
-            const name = document.createElement('div');
-            name.className = 'cal-event-name';
-            name.textContent = ev.label;
-            group.appendChild(name);
+          // Outlook / Apple — single .ics with ALL registered events
+          const iBtn = document.createElement('a');
+          iBtn.className = 'cal-btn';
+          iBtn.href = makeMultiICS(registered);
+          iBtn.download = 'skypointer-agm-2026.ics';
+          iBtn.textContent = 'Outlook / Apple Calendar';
+          row.appendChild(iBtn);
 
-            const row = document.createElement('div');
-            row.className = 'cal-btn-row';
+          // Google Calendar — links to first event (Google doesn't support multi-event URLs)
+          const gBtn = document.createElement('a');
+          gBtn.className = 'cal-btn';
+          gBtn.href = makeGoogleURL(registered[0]);
+          gBtn.target = '_blank';
+          gBtn.rel = 'noopener';
+          gBtn.textContent = registered.length > 1 ? 'Google Calendar (first event)' : 'Google Calendar';
+          row.appendChild(gBtn);
 
-            // Google Calendar button
-            const gBtn = document.createElement('a');
-            gBtn.className = 'cal-btn';
-            gBtn.href = makeGoogleURL(ev.label, ev.start, ev.end, ev.desc);
-            gBtn.target = '_blank';
-            gBtn.rel = 'noopener';
-            gBtn.textContent = 'Google Calendar';
-            row.appendChild(gBtn);
+          calSection.appendChild(row);
 
-            // Outlook / Apple (.ics) button
-            const iBtn = document.createElement('a');
-            iBtn.className = 'cal-btn';
-            iBtn.href = makeICS(ev.label, ev.start, ev.end, ev.desc);
-            iBtn.download = ev.label.replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.ics';
-            iBtn.textContent = 'Outlook / Apple';
-            row.appendChild(iBtn);
-
-            group.appendChild(row);
-            calSection.appendChild(group);
-          });
+          if (registered.length > 1) {
+            const note = document.createElement('p');
+            note.style.cssText = 'font-size:10px;color:var(--gray-50);margin-top:6px;text-align:center;';
+            note.textContent = 'The Outlook/Apple file includes all ' + registered.length + ' events.';
+            calSection.appendChild(note);
+          }
         }
 
         document.getElementById('formState').style.display = 'none';
