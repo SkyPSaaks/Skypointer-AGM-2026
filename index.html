@@ -226,7 +226,7 @@
         <div class="schedule-day">Fri 23</div>
         <div class="schedule-content">
           <div class="schedule-title">AGM &amp; Investor Day</div>
-          <div class="schedule-detail">8:30 am – 1:00 pm · Club Financiero Génova</div>
+          <div class="schedule-detail">9:00 am – 1:00 pm · Club Financiero Génova</div>
         </div>
       </div>
     </div>
@@ -260,7 +260,7 @@
             <input type="checkbox" id="chk-agm" onchange="toggleOption('opt-agm', this)" />
             <div class="event-info">
               <div class="event-name">AGM &amp; Investor Day</div>
-              <div class="event-meta">Friday 23 October · 8:30 am – 1:00 pm<br>Club Financiero Génova · Breakfast will be served</div>
+              <div class="event-meta">Friday 23 October · 9:00 am – 1:00 pm<br>Club Financiero Génova · Breakfast will be served</div>
             </div>
             <div class="event-badge">Fri 23</div>
           </label>
@@ -347,7 +347,7 @@
       },
       agm: {
         label: 'Skypointer AGM & Investor Day',
-        start: '2026-10-23T08:30:00',
+        start: '2026-10-23T09:00:00',
         end:   '2026-10-23T13:00:00',
         location: 'Club Financiero Génova, Madrid, Spain',
         mapsUrl: 'https://maps.app.goo.gl/PscrrneQ4S5uUe5P7',
@@ -471,13 +471,16 @@
           iBtn.textContent = 'Outlook / Apple Calendar';
           row.appendChild(iBtn);
 
-          // Google Calendar — links to first event (Google doesn't support multi-event URLs)
+          // Google Calendar — AGM takes priority, then dinner, then lunch
+          const googleKey = registered.includes('agm') ? 'agm'
+                          : registered.includes('dinner') ? 'dinner'
+                          : 'lunch';
           const gBtn = document.createElement('a');
           gBtn.className = 'cal-btn';
-          gBtn.href = makeGoogleURL(registered[0]);
+          gBtn.href = makeGoogleURL(googleKey);
           gBtn.target = '_blank';
           gBtn.rel = 'noopener';
-          gBtn.textContent = registered.length > 1 ? 'Google Calendar (first event)' : 'Google Calendar';
+          gBtn.textContent = 'Google Calendar';
           row.appendChild(gBtn);
 
           calSection.appendChild(row);
@@ -485,7 +488,8 @@
           if (registered.length > 1) {
             const note = document.createElement('p');
             note.style.cssText = 'font-size:10px;color:var(--gray-50);margin-top:6px;text-align:center;';
-            note.textContent = 'The Outlook/Apple file includes all ' + registered.length + ' events.';
+            const googleEventLabel = EVENTS[googleKey].label;
+            note.textContent = 'Outlook/Apple includes all ' + registered.length + ' events. Google Calendar adds: ' + googleEventLabel + '.';
             calSection.appendChild(note);
           }
         }
