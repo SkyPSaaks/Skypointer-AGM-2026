@@ -387,14 +387,14 @@
       return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
     }
 
-    // Google Calendar only supports one event per URL, so link to the first registered event
-    // and note others are in the .ics file
+    // Google Calendar — pass Madrid timezone explicitly so it shows correctly for everyone
     function makeGoogleURL(key) {
       const ev = EVENTS[key];
-      const fmt = s => s.replace(/[-:T]/g,'') + '00';
+      const fmt = s => s.replace(/[-:T]/g, '').slice(0, 15); // YYYYMMDDTHHmmss
       return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
         + '&text=' + encodeURIComponent(ev.label)
         + '&dates=' + fmt(ev.start) + '/' + fmt(ev.end)
+        + '&ctz=Europe%2FMadrid'
         + '&details=' + encodeURIComponent(ev.desc)
         + '&location=' + encodeURIComponent('Madrid, Spain (Venue TBC)');
     }
