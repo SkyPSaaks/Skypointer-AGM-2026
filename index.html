@@ -500,24 +500,27 @@
           row.style.justifyContent = 'center';
           row.style.marginTop = '6px';
 
-          // Outlook / Apple — same priority as Google: AGM > dinner > lunch
+          // Priority key for Outlook and Google: AGM > dinner > lunch
           const icsKey = registered.includes('agm') ? 'agm'
                        : registered.includes('dinner') ? 'dinner'
                        : 'lunch';
-          const icsData = makeMultiICS([icsKey], email);
 
-          // Apple Calendar — .ics download
+          // Apple Calendar — ALL registered events in one .ics
+          const appleIcsData = makeMultiICS(registered, email);
           const appleBtn = document.createElement('a');
           appleBtn.className = 'cal-btn';
-          appleBtn.href = icsData;
+          appleBtn.href = appleIcsData;
           appleBtn.download = 'skypointer-agm-2026.ics';
           appleBtn.textContent = 'Apple Calendar';
           row.appendChild(appleBtn);
 
-          // Outlook — also .ics download (webcal doesn't work reliably from browser)
+          // Outlook — single priority event .ics
+          const outlookIcsData = makeMultiICS([icsKey], email);
+
+          // Outlook — single priority event
           const outlookBtn = document.createElement('a');
           outlookBtn.className = 'cal-btn';
-          outlookBtn.href = icsData;
+          outlookBtn.href = outlookIcsData;
           outlookBtn.download = 'skypointer-agm-2026.ics';
           outlookBtn.textContent = 'Outlook';
           outlookBtn.addEventListener('click', function() {
@@ -545,8 +548,8 @@
 
           if (registered.length > 1) {
             const note = document.createElement('p');
-            note.style.cssText = 'font-size:10px;color:var(--gray-50);margin-top:6px;text-align:center;';
-            note.textContent = 'Each button adds the ' + EVENTS[icsKey].label + ' to your calendar.';
+            note.style.cssText = 'font-size:10px;color:var(--gray-50);margin-top:6px;text-align:center;line-height:1.5;';
+            note.textContent = 'Apple Calendar adds all ' + registered.length + ' events. Outlook & Google add the ' + EVENTS[icsKey].label + '.';
             calSection.appendChild(note);
           }
 
