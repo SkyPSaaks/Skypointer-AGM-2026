@@ -393,6 +393,8 @@
       ].join('\r\n');
       return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
     }
+
+    function makeMultiICS(keys, attendeeEmail) {
       const now = new Date();
       const pad = n => String(n).padStart(2,'0');
       const stamp = now.getUTCFullYear() + pad(now.getUTCMonth()+1) + pad(now.getUTCDate())
