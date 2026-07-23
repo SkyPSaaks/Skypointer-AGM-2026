@@ -226,7 +226,7 @@
         <div class="schedule-day">Fri 23</div>
         <div class="schedule-content">
           <div class="schedule-title">AGM &amp; Investor Day</div>
-          <div class="schedule-detail">9:00 am – 1:00 pm · Club Financiero Génova</div>
+          <div class="schedule-detail">9:00 am – 1:00 pm · Venue TBC</div>
         </div>
       </div>
     </div>
@@ -260,7 +260,7 @@
             <input type="checkbox" id="chk-agm" onchange="toggleOption('opt-agm', this)" />
             <div class="event-info">
               <div class="event-name">AGM &amp; Investor Day</div>
-              <div class="event-meta">Friday 23 October · 9:00 am – 1:00 pm<br>Club Financiero Génova · Breakfast will be served</div>
+              <div class="event-meta">Friday 23 October · 9:00 am – 1:00 pm · Venue TBC<br>Breakfast will be served</div>
             </div>
             <div class="event-badge">Fri 23</div>
           </label>
@@ -268,7 +268,7 @@
             <input type="checkbox" id="chk-lunch" onchange="toggleOption('opt-lunch', this)" />
             <div class="event-info">
               <div class="event-name">Post-AGM Lunch</div>
-              <div class="event-meta">Friday 23 October · From 1:00 pm<br>Club Financiero Génova</div>
+              <div class="event-meta">Friday 23 October · From 1:00 pm · Venue TBC</div>
             </div>
             <div class="event-badge">Fri 23</div>
           </label>
@@ -349,17 +349,17 @@
         label: 'Skypointer AGM & Investor Day',
         start: '2026-10-23T09:00:00',
         end:   '2026-10-23T13:00:00',
-        location: 'Club Financiero Genova, Madrid, Spain',
-        mapsUrl: 'https://maps.app.goo.gl/PscrrneQ4S5uUe5P7',
-        desc:  'Skypointer Venture Partners AGM & Investor Day 2026. Venue: Club Financiero Genova, Madrid. Map: https://maps.app.goo.gl/PscrrneQ4S5uUe5P7. Breakfast will be served.'
+        location: 'Madrid, Spain (Venue TBC)',
+        mapsUrl: null,
+        desc:  'Skypointer Venture Partners AGM & Investor Day 2026. Madrid. Venue to be confirmed.'
       },
       lunch: {
         label: 'Skypointer Post-AGM Lunch',
         start: '2026-10-23T13:00:00',
         end:   '2026-10-23T15:00:00',
-        location: 'Club Financiero Genova, Madrid, Spain',
-        mapsUrl: 'https://maps.app.goo.gl/PscrrneQ4S5uUe5P7',
-        desc:  'Skypointer Venture Partners Post-AGM Lunch 2026. Venue: Club Financiero Genova, Madrid. Map: https://maps.app.goo.gl/PscrrneQ4S5uUe5P7'
+        location: 'Madrid, Spain (Venue TBC)',
+        mapsUrl: null,
+        desc:  'Skypointer Venture Partners Post-AGM Lunch 2026. Madrid. Venue to be confirmed.'
       }
     };
 
@@ -499,13 +499,31 @@
           row.style.justifyContent = 'center';
           row.style.marginTop = '6px';
 
-          // Outlook / Apple — single .ics with ALL registered events
-          const iBtn = document.createElement('a');
-          iBtn.className = 'cal-btn';
-          iBtn.href = makeMultiICS(registered);
-          iBtn.download = 'skypointer-agm-2026.ics';
-          iBtn.textContent = 'Outlook / Apple Calendar';
-          row.appendChild(iBtn);
+          // Outlook / Apple — separate buttons
+          const icsData = makeMultiICS(registered);
+
+          // Apple Calendar — .ics download
+          const appleBtn = document.createElement('a');
+          appleBtn.className = 'cal-btn';
+          appleBtn.href = icsData;
+          appleBtn.download = 'skypointer-agm-2026.ics';
+          appleBtn.textContent = 'Apple Calendar';
+          row.appendChild(appleBtn);
+
+          // Outlook — also .ics download (webcal doesn't work reliably from browser)
+          const outlookBtn = document.createElement('a');
+          outlookBtn.className = 'cal-btn';
+          outlookBtn.href = icsData;
+          outlookBtn.download = 'skypointer-agm-2026.ics';
+          outlookBtn.textContent = 'Outlook';
+          outlookBtn.addEventListener('click', function() {
+            // Small note shown after click for Outlook users
+            setTimeout(() => {
+              const hint = document.getElementById('outlook-hint');
+              if (hint) hint.style.display = 'block';
+            }, 500);
+          });
+          row.appendChild(outlookBtn);
 
           // Google Calendar — AGM takes priority, then dinner, then lunch
           const googleKey = registered.includes('agm') ? 'agm'
@@ -528,6 +546,13 @@
             note.textContent = 'Outlook/Apple includes all ' + registered.length + ' events. Google Calendar adds: ' + googleEventLabel + '.';
             calSection.appendChild(note);
           }
+
+          // Outlook hint — shown after clicking Outlook button
+          const outlookHint = document.createElement('p');
+          outlookHint.id = 'outlook-hint';
+          outlookHint.style.cssText = 'display:none;font-size:10px;color:var(--orange);margin-top:8px;text-align:center;line-height:1.5;';
+          outlookHint.textContent = 'In Outlook: open the downloaded file, then click "Add to Calendar" at the top.';
+          calSection.appendChild(outlookHint);
         }
 
         document.getElementById('formState').style.display = 'none';
