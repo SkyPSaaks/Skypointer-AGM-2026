@@ -364,7 +364,7 @@
     };
 
     // Build a single .ics file containing all registered events
-    function makeMultiICS(keys) {
+    function makeMultiICS(keys, attendeeEmail) {
       const now = new Date();
       const pad = n => String(n).padStart(2,'0');
       const stamp = now.getUTCFullYear() + pad(now.getUTCMonth()+1) + pad(now.getUTCDate())
@@ -390,6 +390,7 @@
           fold('LOCATION:' + esc(ev.location)),
           fold('DESCRIPTION:' + esc(ev.desc)),
           'ORGANIZER;CN=Skypointer VP:mailto:saakya@skypointervp.com',
+          fold('ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailto:' + attendeeEmail),
           'STATUS:CONFIRMED',
           'SEQUENCE:0',
           'CLASS:PUBLIC',
@@ -402,7 +403,7 @@
         'VERSION:2.0',
         'PRODID:-//Skypointer VP//AGM 2026//EN',
         'CALSCALE:GREGORIAN',
-        'METHOD:PUBLISH',
+        'METHOD:REQUEST',
         'X-WR-CALNAME:Skypointer AGM 2026',
         'X-WR-TIMEZONE:Europe/Madrid',
         'BEGIN:VTIMEZONE',
@@ -500,7 +501,7 @@
           row.style.marginTop = '6px';
 
           // Outlook / Apple — separate buttons
-          const icsData = makeMultiICS(registered);
+          const icsData = makeMultiICS(registered, email);
 
           // Apple Calendar — .ics download
           const appleBtn = document.createElement('a');
