@@ -364,7 +364,35 @@
     };
 
     // Build a single .ics file containing all registered events
-    function makeMultiICS(keys, attendeeEmail) {
+    // Apple Calendar — simple PUBLISH ICS with all events (no VTIMEZONE needed, Apple handles it)
+    function makeAppleICS(keys) {
+      const fmtLocal = s => s.replace(/[-:]/g, '');
+      const stamp = new Date().toISOString().replace(/[-:]/g,'').replace('.000Z','Z');
+      const veventBlocks = keys.map((key, i) => {
+        const ev = EVENTS[key];
+        return [
+          'BEGIN:VEVENT',
+          'UID:' + (Date.now() + i) + '@skypointer.com',
+          'DTSTAMP:' + stamp,
+          'DTSTART;TZID=Europe/Madrid:' + fmtLocal(ev.start),
+          'DTEND;TZID=Europe/Madrid:' + fmtLocal(ev.end),
+          'SUMMARY:' + ev.label,
+          'DESCRIPTION:' + ev.desc.replace(/\n/g, '\\n'),
+          'LOCATION:' + ev.location,
+          'END:VEVENT'
+        ].join('\r\n');
+      });
+      const ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Skypointer VP//AGM 2026//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        ...veventBlocks,
+        'END:VCALENDAR'
+      ].join('\r\n');
+      return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+    }
       const now = new Date();
       const pad = n => String(n).padStart(2,'0');
       const stamp = now.getUTCFullYear() + pad(now.getUTCMonth()+1) + pad(now.getUTCDate())
@@ -505,8 +533,8 @@
                        : registered.includes('dinner') ? 'dinner'
                        : 'lunch';
 
-          // Apple Calendar — ALL registered events in one .ics
-          const appleIcsData = makeMultiICS(registered, email);
+          // Apple Calendar — ALL registered events, simple PUBLISH ICS
+          const appleIcsData = makeAppleICS(registered);
           const appleBtn = document.createElement('a');
           appleBtn.className = 'cal-btn';
           appleBtn.href = appleIcsData;
