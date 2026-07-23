@@ -389,8 +389,10 @@
           fold('SUMMARY:' + ev.label),
           fold('LOCATION:' + esc(ev.location)),
           fold('DESCRIPTION:' + esc(ev.desc)),
+          'ORGANIZER;CN=Skypointer VP:mailto:saakya@skypointervp.com',
           'STATUS:CONFIRMED',
           'SEQUENCE:0',
+          'CLASS:PUBLIC',
           'END:VEVENT'
         ].join('\r\n');
       }).join('\r\n');
@@ -400,7 +402,7 @@
         'VERSION:2.0',
         'PRODID:-//Skypointer VP//AGM 2026//EN',
         'CALSCALE:GREGORIAN',
-        'METHOD:REQUEST',
+        'METHOD:PUBLISH',
         'X-WR-CALNAME:Skypointer AGM 2026',
         'X-WR-TIMEZONE:Europe/Madrid',
         'BEGIN:VTIMEZONE',
