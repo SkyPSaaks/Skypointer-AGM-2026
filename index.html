@@ -500,8 +500,11 @@
           row.style.justifyContent = 'center';
           row.style.marginTop = '6px';
 
-          // Outlook / Apple — separate buttons
-          const icsData = makeMultiICS(registered, email);
+          // Outlook / Apple — same priority as Google: AGM > dinner > lunch
+          const icsKey = registered.includes('agm') ? 'agm'
+                       : registered.includes('dinner') ? 'dinner'
+                       : 'lunch';
+          const icsData = makeMultiICS([icsKey], email);
 
           // Apple Calendar — .ics download
           const appleBtn = document.createElement('a');
@@ -543,8 +546,7 @@
           if (registered.length > 1) {
             const note = document.createElement('p');
             note.style.cssText = 'font-size:10px;color:var(--gray-50);margin-top:6px;text-align:center;';
-            const googleEventLabel = EVENTS[googleKey].label;
-            note.textContent = 'Outlook/Apple includes all ' + registered.length + ' events. Google Calendar adds: ' + googleEventLabel + '.';
+            note.textContent = 'Each button adds the ' + EVENTS[icsKey].label + ' to your calendar.';
             calSection.appendChild(note);
           }
 
